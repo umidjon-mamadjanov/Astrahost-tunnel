@@ -3,16 +3,19 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/astrahost/server/internal/tunnel"
+	ws "github.com/astrahost/server/internal/websocket"
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Astrahost Server v0.1"))
-	})
 
-	log.Println("Server started on :8080")
+	registry := tunnel.NewRegistry()
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal(err)
-	}
+	http.HandleFunc("/connect", ws.NewHandler(registry))
+
+	log.Println("Astra Tunnel Server started")
+	log.Println("Listening on :8080")
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
