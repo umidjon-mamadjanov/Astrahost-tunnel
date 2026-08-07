@@ -4,15 +4,17 @@ type PacketType uint8
 
 const (
 	PacketConnect PacketType = iota + 1
+	PacketConnectOK
+
 	PacketAuth
-	PacketSubdomainCheck
-	PacketSubdomainOK
-	PacketSubdomainTaken
-	PacketRegister
-	PacketHTTPRequest
-	PacketHTTPResponse
+	PacketAuthOK
+
 	PacketPing
 	PacketPong
+
+	PacketHTTPRequest
+	PacketHTTPResponse
+
 	PacketError
 	PacketDisconnect
 )
