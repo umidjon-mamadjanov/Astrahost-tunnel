@@ -8,6 +8,7 @@ type ConnectRequest struct {
 }
 
 type ConnectResponse struct {
-	Success bool   `json:"success"`
-	Message string `json:"message"`
+	Success       bool   `json:"success"`
+	ServerVersion string `json:"server_version"`
+	Message       string `json:"message"`
 }

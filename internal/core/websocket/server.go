@@ -3,8 +3,8 @@ package websocket
 import (
 	"net/http"
 
-	"github.com/gorilla/websocket"
 	"github.com/astrahost/astrahost-tunnel/internal/core/connection"
+	"github.com/gorilla/websocket"
 )
 
 type Server struct {

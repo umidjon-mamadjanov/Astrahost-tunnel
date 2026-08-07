@@ -1,20 +1,20 @@
 package server
 
 import (
+	"github.com/astrahost/astrahost-tunnel/internal/core/websocket"
 	"log"
 	"net/http"
-	"github.com/astrahost/astrahost-tunnel/internal/core/websocket"
 )
 
 type App struct {
 	cfg Config
-	ws *websocket.Server
+	ws  *websocket.Server
 }
 
 func New() *App {
 	return &App{
 		cfg: DefaultConfig(),
-		ws: websocket.New(),
+		ws:  websocket.New(),
 	}
 }
 
