@@ -16,9 +16,16 @@ const (
 )
 
 type Session struct {
-	ID    string
-	Conn  *websocket.Conn
+	ID string
+
+	Conn *websocket.Conn
+
 	State State
+
+	ProtocolVersion uint8
+	ClientVersion   string
+	Platform        string
+	Architecture    string
 
 	CreatedAt time.Time
 	LastSeen  time.Time

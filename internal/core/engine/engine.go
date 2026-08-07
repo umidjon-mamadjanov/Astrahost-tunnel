@@ -18,7 +18,7 @@ func New(d *dispatcher.Dispatcher) *Engine {
 
 func (e *Engine) Handle(
 	session *connection.Session,
-	packet protocol.Packet,
+	packet *protocol.Packet,
 ) error {
 	return e.dispatcher.Dispatch(session, packet)
 }

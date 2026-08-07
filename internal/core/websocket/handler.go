@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/astrahost/astrahost-tunnel/internal/core/connection"
+	"github.com/astrahost/astrahost-tunnel/internal/core/protocol"
+	"github.com/astrahost/astrahost-tunnel/internal/core/transport"
 )
 
 func (s *Server) Handle(w http.ResponseWriter, r *http.Request) {
@@ -17,15 +19,17 @@ func (s *Server) Handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer conn.Close()
-
-	// ===== Session yaratish =====
-
 	id := uuid.NewString()
 
 	session := &connection.Session{
 		ID:        id,
 		Conn:      conn,
+		Transport: transport.NewWebSocket(conn),
+
+		State: connection.StateConnected,
+
+		Send: make(chan *protocol.Packet, 32),
+
 		CreatedAt: time.Now(),
 		LastSeen:  time.Now(),
 	}

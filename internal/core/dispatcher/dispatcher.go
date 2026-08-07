@@ -9,7 +9,7 @@ import (
 
 type HandlerFunc func(
 	session *connection.Session,
-	packet protocol.Packet,
+	packet *protocol.Packet,
 ) error
 
 type Dispatcher struct {
@@ -31,7 +31,7 @@ func (d *Dispatcher) Register(
 
 func (d *Dispatcher) Dispatch(
 	session *connection.Session,
-	packet protocol.Packet,
+	packet *protocol.Packet,
 ) error {
 
 	handler, ok := d.handlers[packet.Header.Type]
