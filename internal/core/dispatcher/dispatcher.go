@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/astrahost/astrahost-tunnel/internal/core/connection"
-	"github.com/astrahost/astrahost-tunnel/internal/core/protocol"
+	"github.com/astrahost/astrahost-tunnel/protocol"
 )
 
 type HandlerFunc func(
@@ -33,7 +33,6 @@ func (d *Dispatcher) Dispatch(
 	session *connection.Session,
 	packet *protocol.Packet,
 ) error {
-
 	handler, ok := d.handlers[packet.Header.Type]
 	if !ok {
 		return fmt.Errorf("unknown packet type: %d", packet.Header.Type)

@@ -1,9 +1,11 @@
 package server
 
 import (
-	"github.com/astrahost/astrahost-tunnel/internal/core/websocket"
 	"log"
 	"net/http"
+
+	"github.com/astrahost/astrahost-tunnel/internal/core/bootstrap"
+	"github.com/astrahost/astrahost-tunnel/internal/core/websocket"
 )
 
 type App struct {
@@ -12,14 +14,15 @@ type App struct {
 }
 
 func New() *App {
+	engine := bootstrap.NewEngine()
+
 	return &App{
 		cfg: DefaultConfig(),
-		ws:  websocket.New(),
+		ws:  websocket.New(engine),
 	}
 }
 
 func (a *App) Run() error {
-
 	server := &http.Server{
 		Addr:    a.cfg.Address,
 		Handler: a.routes(),

@@ -4,38 +4,63 @@ import (
 	"testing"
 
 	"github.com/astrahost/astrahost-tunnel/internal/core/connection"
-	"github.com/astrahost/astrahost-tunnel/internal/core/protocol"
+	"github.com/astrahost/astrahost-tunnel/protocol"
 )
 
 func TestHandleConnect(t *testing.T) {
-
 	h := New()
 
 	req := protocol.ConnectRequest{
-		ProtocolVersion: protocol.ProtocolVersion,
-		ClientVersion:   "0.1.0",
+		ProtocolVersion: protocol.Version,
+		ClientVersion:   "1.0.0",
 		Platform:        "android",
 		Architecture:    "arm64",
+		TunnelName:      "test",
 	}
 
-	payload, err := protocol.EncodeJSON(req)
+	packet, err := protocol.NewConnectPacket(req)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	packet := protocol.NewPacket(
-		protocol.PacketConnect,
-		payload,
-	)
-
-	session := &connection.Session{}
+	session := &connection.Session{
+		ID: "test-session",
+	}
 
 	err = h.HandlePacket(session, &packet)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if session.ClientVersion != "0.1.0" {
-		t.Fatal("client version not saved")
+	if session.ClientVersion != "1.0.0" {
+		t.Fatalf(
+			"client version not saved: got %s",
+			session.ClientVersion,
+		)
+	}
+
+	if session.ProtocolVersion != protocol.Version {
+		t.Fatalf(
+			"protocol version not saved: got %d",
+			session.ProtocolVersion,
+		)
+	}
+
+	if session.Platform != "android" {
+		t.Fatalf(
+			"platform not saved: got %s",
+			session.Platform,
+		)
+	}
+
+	if session.Architecture != "arm64" {
+		t.Fatalf(
+			"architecture not saved: got %s",
+			session.Architecture,
+		)
+	}
+
+	if session.State != connection.StateReady {
+		t.Fatalf("session is not READY")
 	}
 }

@@ -3,7 +3,7 @@ package engine
 import (
 	"github.com/astrahost/astrahost-tunnel/internal/core/connection"
 	"github.com/astrahost/astrahost-tunnel/internal/core/dispatcher"
-	"github.com/astrahost/astrahost-tunnel/internal/core/protocol"
+	"github.com/astrahost/astrahost-tunnel/protocol"
 )
 
 type Engine struct {
