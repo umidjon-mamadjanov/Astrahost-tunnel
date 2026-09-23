@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/astrahost/astrahost-tunnel/internal/core/bootstrap"
+	"github.com/astrahost/astrahost-tunnel/internal/core/connection"
 	"github.com/astrahost/astrahost-tunnel/internal/core/websocket"
 )
 
@@ -14,11 +15,12 @@ type App struct {
 }
 
 func New() *App {
-	engine := bootstrap.NewEngine()
+	registry := connection.NewRegistry()
+	engine := bootstrap.NewEngine(registry)
 
 	return &App{
 		cfg: DefaultConfig(),
-		ws:  websocket.New(engine),
+		ws:  websocket.New(engine, registry),
 	}
 }
 

@@ -8,10 +8,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type Handler struct{}
+type Handler struct {
+	registry *connection.Registry
+}
 
-func New() *Handler {
-	return &Handler{}
+func New(registry *connection.Registry) *Handler {
+	return &Handler{
+		registry: registry,
+	}
 }
 
 func (h *Handler) HandleConnect(
@@ -28,10 +32,16 @@ func (h *Handler) HandleConnect(
 	session.Architecture = req.Architecture
 	session.State = connection.StateReady
 
+	tunnelID := uuid.NewString()
+
+	session.TunnelID = tunnelID
+
+	h.registry.Register(tunnelID, session)
+
 	return &protocol.ConnectResponse{
 		ProtocolVersion:   protocol.Version,
 		SessionID:         session.ID,
-		TunnelID:          uuid.NewString(),
+		TunnelID:          tunnelID,
 		HeartbeatInterval: 20,
 	}, nil
 }

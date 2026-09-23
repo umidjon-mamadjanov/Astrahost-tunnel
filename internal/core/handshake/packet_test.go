@@ -8,7 +8,8 @@ import (
 )
 
 func TestHandleConnect(t *testing.T) {
-	h := New()
+	registry := connection.NewRegistry()
+	handler := New(registry)
 
 	req := protocol.ConnectRequest{
 		ProtocolVersion: protocol.Version,
@@ -27,9 +28,57 @@ func TestHandleConnect(t *testing.T) {
 		ID: "test-session",
 	}
 
-	err = h.HandlePacket(session, &packet)
+	response, err := handler.HandlePacket(session, &packet)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	if response == nil {
+		t.Fatal("expected CONNECT_OK response")
+	}
+
+	if response.Header.Type != protocol.PacketConnectOK {
+		t.Fatalf(
+			"unexpected response type: %d",
+			response.Header.Type,
+		)
+	}
+
+	connectOK, err := protocol.DecodeConnectResponse(response.Payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if connectOK.ProtocolVersion != protocol.Version {
+		t.Fatalf("unexpected protocol version: %d", connectOK.ProtocolVersion)
+	}
+
+	if connectOK.SessionID != "test-session" {
+		t.Fatalf("unexpected session ID: %s", connectOK.SessionID)
+	}
+
+	if connectOK.TunnelID == "" {
+		t.Fatal("tunnel ID is empty")
+	}
+
+	registeredSession, ok := registry.Get(connectOK.TunnelID)
+	if !ok {
+		t.Fatal("tunnel was not registered")
+	}
+
+	if registeredSession != session {
+		t.Fatal("registered session does not match")
+	}
+
+	if connectOK.HeartbeatInterval != 20 {
+		t.Fatalf(
+			"unexpected heartbeat interval: %d",
+			connectOK.HeartbeatInterval,
+		)
+	}
+
+	if response.Header.RequestID != packet.Header.RequestID {
+		t.Fatal("request ID was not preserved")
 	}
 
 	if session.ClientVersion != "1.0.0" {
@@ -61,6 +110,6 @@ func TestHandleConnect(t *testing.T) {
 	}
 
 	if session.State != connection.StateReady {
-		t.Fatalf("session is not READY")
+		t.Fatal("session is not READY")
 	}
 }

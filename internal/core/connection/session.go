@@ -23,6 +23,7 @@ type Session struct {
 	State State
 
 	ProtocolVersion uint8
+	TunnelID        string
 	ClientVersion   string
 	Platform        string
 	Architecture    string

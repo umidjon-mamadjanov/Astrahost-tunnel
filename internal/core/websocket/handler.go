@@ -39,6 +39,18 @@ func (s *Server) Handle(w http.ResponseWriter, r *http.Request) {
 	)
 
 	defer func() {
+		if session.TunnelID != "" {
+			s.registry.Unregister(session.TunnelID)
+
+			log.Printf(
+				"Tunnel unregistered: %s | Session: %s",
+				session.TunnelID,
+				id,
+			)
+		}
+
+		session.State = connection.StateClosed
+
 		s.manager.Remove(id)
 
 		log.Printf(
@@ -46,6 +58,40 @@ func (s *Server) Handle(w http.ResponseWriter, r *http.Request) {
 			id,
 			s.manager.Count(),
 		)
+	}()
+
+	ticker := time.NewTicker(20 * time.Second)
+	defer ticker.Stop()
+
+	go func() {
+		for range ticker.C {
+			ping := protocol.NewPingPacket()
+
+			data, err := protocol.EncodePacket(ping)
+			if err != nil {
+				log.Printf(
+					"Failed to encode PING | Session: %s | Error: %v",
+					id,
+					err,
+				)
+				return
+			}
+
+			s.writeMu.Lock()
+			err = conn.WriteMessage(websocket.BinaryMessage, data)
+			s.writeMu.Unlock()
+
+			if err != nil {
+				log.Printf(
+					"Failed to send PING | Session: %s | Error: %v",
+					id,
+					err,
+				)
+				return
+			}
+
+			log.Printf("PING sent | Session: %s", id)
+		}
 	}()
 
 	for {
@@ -74,13 +120,40 @@ func (s *Server) Handle(w http.ResponseWriter, r *http.Request) {
 
 		session.LastSeen = time.Now()
 
-		if err := s.engine.Handle(session, &packet); err != nil {
+		response, err := s.engine.Handle(session, &packet)
+		if err != nil {
 			log.Printf(
 				"Packet handling failed | Session: %s | Type: %d | Error: %v",
 				id,
 				packet.Header.Type,
 				err,
 			)
+			continue
+		}
+
+		if response != nil {
+			data, err := protocol.EncodePacket(*response)
+			if err != nil {
+				log.Printf(
+					"Failed to encode response | Session: %s | Error: %v",
+					id,
+					err,
+				)
+				continue
+			}
+
+			s.writeMu.Lock()
+			err = conn.WriteMessage(websocket.BinaryMessage, data)
+			s.writeMu.Unlock()
+
+			if err != nil {
+				log.Printf(
+					"Failed to send response | Session: %s | Error: %v",
+					id,
+					err,
+				)
+				return
+			}
 		}
 	}
 }

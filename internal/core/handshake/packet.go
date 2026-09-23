@@ -10,9 +10,9 @@ import (
 func (h *Handler) HandlePacket(
 	session *connection.Session,
 	packet *protocol.Packet,
-) error {
+) (*protocol.Packet, error) {
 	if packet.Header.Type != protocol.PacketConnect {
-		return fmt.Errorf(
+		return nil, fmt.Errorf(
 			"expected CONNECT packet, got %d",
 			packet.Header.Type,
 		)
@@ -20,13 +20,20 @@ func (h *Handler) HandlePacket(
 
 	req, err := protocol.DecodeConnectRequest(packet.Payload)
 	if err != nil {
-		return fmt.Errorf("decode CONNECT: %w", err)
+		return nil, fmt.Errorf("decode CONNECT: %w", err)
 	}
 
-	_, err = h.HandleConnect(session, req)
+	resp, err := h.HandleConnect(session, req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	responsePacket, err := protocol.NewConnectOKPacket(*resp)
+	if err != nil {
+		return nil, fmt.Errorf("create CONNECT_OK: %w", err)
+	}
+
+	responsePacket.Header.RequestID = packet.Header.RequestID
+
+	return &responsePacket, nil
 }
