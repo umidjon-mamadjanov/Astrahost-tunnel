@@ -10,8 +10,9 @@ import (
 )
 
 type App struct {
-	cfg Config
-	ws  *websocket.Server
+	cfg      Config
+	ws       *websocket.Server
+	registry *connection.Registry
 }
 
 func New() *App {
@@ -19,8 +20,9 @@ func New() *App {
 	engine := bootstrap.NewEngine(registry)
 
 	return &App{
-		cfg: DefaultConfig(),
-		ws:  websocket.New(engine, registry),
+		cfg:      DefaultConfig(),
+		ws:       websocket.New(engine, registry),
+		registry: registry,
 	}
 }
 
@@ -30,7 +32,10 @@ func (a *App) Run() error {
 		Handler: a.routes(),
 	}
 
-	log.Printf("Astra Tunnel Server listening on %s", a.cfg.Address)
+	log.Printf(
+		"Astra Tunnel Server listening on %s",
+		a.cfg.Address,
+	)
 
 	return server.ListenAndServe()
 }

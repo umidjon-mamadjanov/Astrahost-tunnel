@@ -22,7 +22,7 @@ func (h *Handler) HandlePing(
 		return nil, fmt.Errorf("validate PING: %w", err)
 	}
 
-	session.LastSeen = time.Now()
+	session.Touch(time.Now())
 
 	response := protocol.NewPongPacket(packet.Header.RequestID)
 
@@ -37,7 +37,7 @@ func (h *Handler) HandlePong(
 		return nil, fmt.Errorf("validate PONG: %w", err)
 	}
 
-	session.LastSeen = time.Now()
+	session.Touch(time.Now())
 
 	return nil, nil
 }

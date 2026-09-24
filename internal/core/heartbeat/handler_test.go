@@ -44,7 +44,7 @@ func TestHandlePing(t *testing.T) {
 		t.Fatal("PONG request ID does not match PING request ID")
 	}
 
-	if !session.LastSeen.After(oldLastSeen) {
+	if !session.GetLastSeen().After(oldLastSeen) {
 		t.Fatal("LastSeen was not updated")
 	}
 

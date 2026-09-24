@@ -13,6 +13,8 @@ type ConnectRequest struct {
 	Platform        string `json:"platform"`
 	Architecture    string `json:"architecture"`
 	TunnelName      string `json:"tunnel_name,omitempty"`
+	LocalHost       string `json:"local_host,omitempty"`
+	LocalPort       uint16 `json:"local_port,omitempty"`
 	Auth            string `json:"auth,omitempty"`
 }
 
@@ -21,6 +23,7 @@ type ConnectResponse struct {
 	SessionID         string `json:"session_id"`
 	TunnelID          string `json:"tunnel_id"`
 	HeartbeatInterval uint32 `json:"heartbeat_interval"`
+	PublicURL         string `json:"public_url,omitempty"`
 }
 
 func EncodeConnectRequest(req ConnectRequest) ([]byte, error) {
@@ -59,6 +62,14 @@ func DecodeConnectRequest(data []byte) (ConnectRequest, error) {
 
 	if req.Architecture == "" {
 		return req, fmt.Errorf("architecture is required")
+	}
+
+	if req.LocalHost == "" {
+		req.LocalHost = "127.0.0.1"
+	}
+
+	if req.LocalPort == 0 {
+		return req, fmt.Errorf("local_port is required")
 	}
 
 	return req, nil

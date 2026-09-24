@@ -24,7 +24,11 @@ func TestHeaderEncodeDecode(t *testing.T) {
 	}
 
 	if len(data) != HeaderSize {
-		t.Fatalf("encoded header length = %d, want %d", len(data), HeaderSize)
+		t.Fatalf(
+			"encoded header length = %d, want %d",
+			len(data),
+			HeaderSize,
+		)
 	}
 
 	decoded, err := DecodeHeader(data)
@@ -33,19 +37,35 @@ func TestHeaderEncodeDecode(t *testing.T) {
 	}
 
 	if decoded.Version != original.Version {
-		t.Errorf("Version = %d, want %d", decoded.Version, original.Version)
+		t.Errorf(
+			"Version = %d, want %d",
+			decoded.Version,
+			original.Version,
+		)
 	}
 
 	if decoded.Type != original.Type {
-		t.Errorf("Type = %d, want %d", decoded.Type, original.Type)
+		t.Errorf(
+			"Type = %d, want %d",
+			decoded.Type,
+			original.Type,
+		)
 	}
 
 	if decoded.Flags != original.Flags {
-		t.Errorf("Flags = %d, want %d", decoded.Flags, original.Flags)
+		t.Errorf(
+			"Flags = %d, want %d",
+			decoded.Flags,
+			original.Flags,
+		)
 	}
 
 	if decoded.RequestID != original.RequestID {
-		t.Errorf("RequestID = %s, want %s", decoded.RequestID, original.RequestID)
+		t.Errorf(
+			"RequestID = %s, want %s",
+			decoded.RequestID,
+			original.RequestID,
+		)
 	}
 
 	if decoded.PayloadLength != original.PayloadLength {
@@ -99,7 +119,11 @@ func TestHeaderValidate(t *testing.T) {
 			err := tt.header.Validate()
 
 			if (err != nil) != tt.wantErr {
-				t.Fatalf("Validate() error = %v, wantErr = %v", err, tt.wantErr)
+				t.Fatalf(
+					"Validate() error = %v, wantErr = %v",
+					err,
+					tt.wantErr,
+				)
 			}
 		})
 	}
@@ -182,6 +206,8 @@ func TestConnectRequestRoundTrip(t *testing.T) {
 		Platform:        "linux",
 		Architecture:    "amd64",
 		TunnelName:      "demo",
+		LocalHost:       "127.0.0.1",
+		LocalPort:       5000,
 		Auth:            "test-key",
 	}
 
@@ -196,7 +222,11 @@ func TestConnectRequestRoundTrip(t *testing.T) {
 	}
 
 	if decoded != original {
-		t.Fatalf("decoded request = %+v, want %+v", decoded, original)
+		t.Fatalf(
+			"decoded request = %+v, want %+v",
+			decoded,
+			original,
+		)
 	}
 }
 
@@ -215,19 +245,23 @@ func TestConnectRequestValidation(t *testing.T) {
 		},
 		{
 			name: "unsupported version",
-			data: `{"protocol_version":99,"client_version":"1.0.0","platform":"linux","architecture":"amd64"}`,
+			data: `{"protocol_version":99,"client_version":"1.0.0","platform":"linux","architecture":"amd64","local_port":5000}`,
 		},
 		{
 			name: "missing client version",
-			data: `{"protocol_version":1,"platform":"linux","architecture":"amd64"}`,
+			data: `{"protocol_version":1,"platform":"linux","architecture":"amd64","local_port":5000}`,
 		},
 		{
 			name: "missing platform",
-			data: `{"protocol_version":1,"client_version":"1.0.0","architecture":"amd64"}`,
+			data: `{"protocol_version":1,"client_version":"1.0.0","architecture":"amd64","local_port":5000}`,
 		},
 		{
 			name: "missing architecture",
-			data: `{"protocol_version":1,"client_version":"1.0.0","platform":"linux"}`,
+			data: `{"protocol_version":1,"client_version":"1.0.0","platform":"linux","local_port":5000}`,
+		},
+		{
+			name: "missing local port",
+			data: `{"protocol_version":1,"client_version":"1.0.0","platform":"linux","architecture":"amd64"}`,
 		},
 	}
 
@@ -246,6 +280,7 @@ func TestConnectResponseRoundTrip(t *testing.T) {
 		SessionID:         "session-123",
 		TunnelID:          "tunnel-123",
 		HeartbeatInterval: 20,
+		PublicURL:         "https://myapp.astra-tunnel.example",
 	}
 
 	data, err := EncodeConnectResponse(original)
@@ -259,7 +294,11 @@ func TestConnectResponseRoundTrip(t *testing.T) {
 	}
 
 	if decoded != original {
-		t.Fatalf("decoded response = %+v, want %+v", decoded, original)
+		t.Fatalf(
+			"decoded response = %+v, want %+v",
+			decoded,
+			original,
+		)
 	}
 }
 
@@ -310,6 +349,8 @@ func TestNewConnectPacket(t *testing.T) {
 		Platform:        "android",
 		Architecture:    "arm64",
 		TunnelName:      "demo",
+		LocalHost:       "127.0.0.1",
+		LocalPort:       5000,
 		Auth:            "test-key",
 	}
 
@@ -319,11 +360,19 @@ func TestNewConnectPacket(t *testing.T) {
 	}
 
 	if packet.Header.Version != Version {
-		t.Errorf("Version = %d, want %d", packet.Header.Version, Version)
+		t.Errorf(
+			"Version = %d, want %d",
+			packet.Header.Version,
+			Version,
+		)
 	}
 
 	if packet.Header.Type != PacketConnect {
-		t.Errorf("Type = %d, want %d", packet.Header.Type, PacketConnect)
+		t.Errorf(
+			"Type = %d, want %d",
+			packet.Header.Type,
+			PacketConnect,
+		)
 	}
 
 	if packet.Header.RequestID == uuid.Nil {
@@ -344,7 +393,11 @@ func TestNewConnectPacket(t *testing.T) {
 	}
 
 	if decoded != req {
-		t.Fatalf("decoded request = %+v, want %+v", decoded, req)
+		t.Fatalf(
+			"decoded request = %+v, want %+v",
+			decoded,
+			req,
+		)
 	}
 }
 
@@ -354,6 +407,7 @@ func TestNewConnectOKPacket(t *testing.T) {
 		SessionID:         "session-123",
 		TunnelID:          "tunnel-123",
 		HeartbeatInterval: 20,
+		PublicURL:         "https://myapp.astra-tunnel.example",
 	}
 
 	packet, err := NewConnectOKPacket(resp)
@@ -362,11 +416,19 @@ func TestNewConnectOKPacket(t *testing.T) {
 	}
 
 	if packet.Header.Version != Version {
-		t.Errorf("Version = %d, want %d", packet.Header.Version, Version)
+		t.Errorf(
+			"Version = %d, want %d",
+			packet.Header.Version,
+			Version,
+		)
 	}
 
 	if packet.Header.Type != PacketConnectOK {
-		t.Errorf("Type = %d, want %d", packet.Header.Type, PacketConnectOK)
+		t.Errorf(
+			"Type = %d, want %d",
+			packet.Header.Type,
+			PacketConnectOK,
+		)
 	}
 
 	if packet.Header.RequestID == uuid.Nil {
@@ -387,7 +449,11 @@ func TestNewConnectOKPacket(t *testing.T) {
 	}
 
 	if decoded != resp {
-		t.Fatalf("decoded response = %+v, want %+v", decoded, resp)
+		t.Fatalf(
+			"decoded response = %+v, want %+v",
+			decoded,
+			resp,
+		)
 	}
 }
 
@@ -398,6 +464,8 @@ func TestPacketEncodeDecodeRoundTrip(t *testing.T) {
 		Platform:        "android",
 		Architecture:    "arm64",
 		TunnelName:      "demo",
+		LocalHost:       "127.0.0.1",
+		LocalPort:       5000,
 		Auth:            "test-key",
 	}
 
@@ -417,33 +485,43 @@ func TestPacketEncodeDecodeRoundTrip(t *testing.T) {
 	}
 
 	if decoded.Header.Version != packet.Header.Version {
-		t.Errorf("Version = %d, want %d",
+		t.Errorf(
+			"Version = %d, want %d",
 			decoded.Header.Version,
-			packet.Header.Version)
+			packet.Header.Version,
+		)
 	}
 
 	if decoded.Header.Type != packet.Header.Type {
-		t.Errorf("Type = %d, want %d",
+		t.Errorf(
+			"Type = %d, want %d",
 			decoded.Header.Type,
-			packet.Header.Type)
+			packet.Header.Type,
+		)
 	}
 
 	if decoded.Header.Flags != packet.Header.Flags {
-		t.Errorf("Flags = %d, want %d",
+		t.Errorf(
+			"Flags = %d, want %d",
 			decoded.Header.Flags,
-			packet.Header.Flags)
+			packet.Header.Flags,
+		)
 	}
 
 	if decoded.Header.RequestID != packet.Header.RequestID {
-		t.Errorf("RequestID = %s, want %s",
+		t.Errorf(
+			"RequestID = %s, want %s",
 			decoded.Header.RequestID,
-			packet.Header.RequestID)
+			packet.Header.RequestID,
+		)
 	}
 
 	if decoded.Header.PayloadLength != packet.Header.PayloadLength {
-		t.Errorf("PayloadLength = %d, want %d",
+		t.Errorf(
+			"PayloadLength = %d, want %d",
 			decoded.Header.PayloadLength,
-			packet.Header.PayloadLength)
+			packet.Header.PayloadLength,
+		)
 	}
 
 	if string(decoded.Payload) != string(packet.Payload) {
@@ -457,6 +535,8 @@ func TestDecodePacketRejectsInvalidLength(t *testing.T) {
 		ClientVersion:   "1.0.0",
 		Platform:        "linux",
 		Architecture:    "amd64",
+		LocalHost:       "127.0.0.1",
+		LocalPort:       5000,
 	})
 
 	if err != nil {
@@ -479,11 +559,19 @@ func TestPingPacket(t *testing.T) {
 	packet := NewPingPacket()
 
 	if packet.Header.Version != Version {
-		t.Errorf("Version = %d, want %d", packet.Header.Version, Version)
+		t.Errorf(
+			"Version = %d, want %d",
+			packet.Header.Version,
+			Version,
+		)
 	}
 
 	if packet.Header.Type != PacketPing {
-		t.Errorf("Type = %d, want %d", packet.Header.Type, PacketPing)
+		t.Errorf(
+			"Type = %d, want %d",
+			packet.Header.Type,
+			PacketPing,
+		)
 	}
 
 	if packet.Header.RequestID == uuid.Nil {
@@ -514,15 +602,27 @@ func TestPongPacket(t *testing.T) {
 	packet := NewPongPacket(requestID)
 
 	if packet.Header.Version != Version {
-		t.Errorf("Version = %d, want %d", packet.Header.Version, Version)
+		t.Errorf(
+			"Version = %d, want %d",
+			packet.Header.Version,
+			Version,
+		)
 	}
 
 	if packet.Header.Type != PacketPong {
-		t.Errorf("Type = %d, want %d", packet.Header.Type, PacketPong)
+		t.Errorf(
+			"Type = %d, want %d",
+			packet.Header.Type,
+			PacketPong,
+		)
 	}
 
 	if packet.Header.RequestID != requestID {
-		t.Errorf("RequestID = %s, want %s", packet.Header.RequestID, requestID)
+		t.Errorf(
+			"RequestID = %s, want %s",
+			packet.Header.RequestID,
+			requestID,
+		)
 	}
 
 	if err := ValidatePong(packet); err != nil {
@@ -566,11 +666,17 @@ func TestErrorPacket(t *testing.T) {
 	}
 
 	if payload.Code != ErrorAuthFailed {
-		t.Fatalf("unexpected error code: %s", payload.Code)
+		t.Fatalf(
+			"unexpected error code: %s",
+			payload.Code,
+		)
 	}
 
 	if payload.Message != "authentication failed" {
-		t.Fatalf("unexpected error message: %s", payload.Message)
+		t.Fatalf(
+			"unexpected error message: %s",
+			payload.Message,
+		)
 	}
 
 	if packet.Header.RequestID != requestID {
@@ -599,7 +705,10 @@ func TestClosePacket(t *testing.T) {
 	}
 
 	if payload.Reason != CloseClientShutdown {
-		t.Fatalf("unexpected close reason: %s", payload.Reason)
+		t.Fatalf(
+			"unexpected close reason: %s",
+			payload.Reason,
+		)
 	}
 
 	if packet.Header.RequestID != requestID {
@@ -614,8 +723,14 @@ func TestHTTPRequestPacket(t *testing.T) {
 		Method: "GET",
 		URL:    "http://localhost:5000/test",
 		Headers: []HTTPHeader{
-			{Name: "Host", Value: "localhost:5000"},
-			{Name: "User-Agent", Value: "Astra-Tunnel"},
+			{
+				Name:  "Host",
+				Value: "localhost:5000",
+			},
+			{
+				Name:  "User-Agent",
+				Value: "Astra-Tunnel",
+			},
 		},
 	}
 
@@ -634,11 +749,19 @@ func TestHTTPRequestPacket(t *testing.T) {
 	}
 
 	if decoded.Method != req.Method {
-		t.Fatalf("method mismatch: got %s, want %s", decoded.Method, req.Method)
+		t.Fatalf(
+			"method mismatch: got %s, want %s",
+			decoded.Method,
+			req.Method,
+		)
 	}
 
 	if decoded.URL != req.URL {
-		t.Fatalf("URL mismatch: got %s, want %s", decoded.URL, req.URL)
+		t.Fatalf(
+			"URL mismatch: got %s, want %s",
+			decoded.URL,
+			req.URL,
+		)
 	}
 
 	if packet.Header.RequestID != requestID {
@@ -652,7 +775,10 @@ func TestHTTPResponsePacket(t *testing.T) {
 	resp := HTTPResponse{
 		StatusCode: 200,
 		Headers: []HTTPHeader{
-			{Name: "Content-Type", Value: "text/plain"},
+			{
+				Name:  "Content-Type",
+				Value: "text/plain",
+			},
 		},
 		Body: []byte("Hello from Astra Tunnel"),
 	}
@@ -680,7 +806,11 @@ func TestHTTPResponsePacket(t *testing.T) {
 	}
 
 	if string(decoded.Body) != string(resp.Body) {
-		t.Fatalf("body mismatch: got %q, want %q", decoded.Body, resp.Body)
+		t.Fatalf(
+			"body mismatch: got %q, want %q",
+			decoded.Body,
+			resp.Body,
+		)
 	}
 
 	if packet.Header.RequestID != requestID {

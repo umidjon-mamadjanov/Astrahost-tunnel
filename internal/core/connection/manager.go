@@ -42,3 +42,16 @@ func (m *Manager) Count() int {
 
 	return len(m.sessions)
 }
+
+func (m *Manager) List() []*Session {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	sessions := make([]*Session, 0, len(m.sessions))
+
+	for _, session := range m.sessions {
+		sessions = append(sessions, session)
+	}
+
+	return sessions
+}

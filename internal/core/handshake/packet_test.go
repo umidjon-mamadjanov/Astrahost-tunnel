@@ -17,6 +17,8 @@ func TestHandleConnect(t *testing.T) {
 		Platform:        "android",
 		Architecture:    "arm64",
 		TunnelName:      "test",
+		LocalHost:       "127.0.0.1",
+		LocalPort:       5000,
 	}
 
 	packet, err := protocol.NewConnectPacket(req)
@@ -109,7 +111,7 @@ func TestHandleConnect(t *testing.T) {
 		)
 	}
 
-	if session.State != connection.StateReady {
+	if session.GetState() != connection.StateReady {
 		t.Fatal("session is not READY")
 	}
 }

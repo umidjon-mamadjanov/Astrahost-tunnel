@@ -23,11 +23,12 @@ func (s *Server) Handle(w http.ResponseWriter, r *http.Request) {
 	id := uuid.NewString()
 
 	session := &connection.Session{
-		ID:        id,
-		Conn:      conn,
-		State:     connection.StateConnected,
-		CreatedAt: time.Now(),
-		LastSeen:  time.Now(),
+		ID:              id,
+		Conn:            conn,
+		State:           connection.StateConnected,
+		CreatedAt:       time.Now(),
+		LastSeen:        time.Now(),
+		PendingRequests: connection.NewPendingRequests(),
 	}
 
 	s.manager.Add(session)
@@ -39,17 +40,19 @@ func (s *Server) Handle(w http.ResponseWriter, r *http.Request) {
 	)
 
 	defer func() {
-		if session.TunnelID != "" {
-			s.registry.Unregister(session.TunnelID)
+		tunnelID := session.GetTunnelID()
+
+		if tunnelID != "" {
+			s.registry.Unregister(tunnelID)
 
 			log.Printf(
 				"Tunnel unregistered: %s | Session: %s",
-				session.TunnelID,
+				tunnelID,
 				id,
 			)
 		}
 
-		session.State = connection.StateClosed
+		session.SetState(connection.StateClosed)
 
 		s.manager.Remove(id)
 
@@ -118,7 +121,7 @@ func (s *Server) Handle(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		session.LastSeen = time.Now()
+		session.Touch(time.Now())
 
 		response, err := s.engine.Handle(session, &packet)
 		if err != nil {

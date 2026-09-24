@@ -26,15 +26,28 @@ func (h *Handler) HandleConnect(
 		return nil, fmt.Errorf("unsupported protocol version")
 	}
 
+	if req.LocalHost == "" {
+		return nil, fmt.Errorf("local host is required")
+	}
+
+	if req.LocalPort == 0 {
+		return nil, fmt.Errorf("local port is required")
+	}
+
 	session.ProtocolVersion = req.ProtocolVersion
 	session.ClientVersion = req.ClientVersion
 	session.Platform = req.Platform
 	session.Architecture = req.Architecture
-	session.State = connection.StateReady
+
+	session.SetLocalTarget(
+		req.LocalHost,
+		req.LocalPort,
+	)
 
 	tunnelID := uuid.NewString()
 
-	session.TunnelID = tunnelID
+	session.SetTunnelID(tunnelID)
+	session.SetState(connection.StateReady)
 
 	h.registry.Register(tunnelID, session)
 
