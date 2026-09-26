@@ -27,12 +27,12 @@ type App struct {
 	Conn *websocket.Conn
 }
 
-func New(localHost string, localPort uint16) *App {
+func New(localHost string, localPort uint16, tunnelName string) *App {
 	return &App{
 		Server:     "ws://localhost:7000/connect",
 		LocalHost:  localHost,
 		LocalPort:  localPort,
-		TunnelName: "local",
+		TunnelName: tunnelName,
 	}
 }
 
@@ -40,7 +40,8 @@ func (a *App) Run() error {
 	log.Println("Astra Tunnel Client")
 
 	log.Printf(
-		"Local: http://%s:%d",
+		"Tunnel: %s | Local: http://%s:%d",
+		a.TunnelName,
 		a.LocalHost,
 		a.LocalPort,
 	)

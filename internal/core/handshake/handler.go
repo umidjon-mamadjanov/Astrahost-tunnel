@@ -2,19 +2,27 @@ package handshake
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/astrahost/astrahost-tunnel/internal/core/connection"
 	"github.com/astrahost/astrahost-tunnel/protocol"
 	"github.com/google/uuid"
 )
 
-type Handler struct {
-	registry *connection.Registry
+type Config struct {
+	BaseDomain string
+	Scheme     string
 }
 
-func New(registry *connection.Registry) *Handler {
+type Handler struct {
+	registry *connection.Registry
+	cfg      Config
+}
+
+func New(registry *connection.Registry, cfg Config) *Handler {
 	return &Handler{
 		registry: registry,
+		cfg:      cfg,
 	}
 }
 
@@ -45,16 +53,35 @@ func (h *Handler) HandleConnect(
 	)
 
 	tunnelID := uuid.NewString()
-
 	session.SetTunnelID(tunnelID)
+
+	subdomain := h.registry.AllocateSubdomain(
+		req.TunnelName,
+		session,
+	)
+
+	session.SetSubdomain(subdomain)
 	session.SetState(connection.StateReady)
 
 	h.registry.Register(tunnelID, session)
+
+	publicURL := ""
+
+	if h.cfg.BaseDomain != "" && subdomain != "" {
+		scheme := h.cfg.Scheme
+		if scheme == "" {
+			scheme = "https"
+		}
+
+		baseDomain := strings.TrimSuffix(h.cfg.BaseDomain, ".")
+		publicURL = scheme + "://" + subdomain + "." + baseDomain
+	}
 
 	return &protocol.ConnectResponse{
 		ProtocolVersion:   protocol.Version,
 		SessionID:         session.ID,
 		TunnelID:          tunnelID,
 		HeartbeatInterval: 20,
+		PublicURL:         publicURL,
 	}, nil
 }

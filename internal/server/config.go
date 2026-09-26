@@ -1,5 +1,7 @@
 package server
 
+import "os"
+
 type Config struct {
 	Address    string
 	BaseDomain string
@@ -7,9 +9,20 @@ type Config struct {
 }
 
 func DefaultConfig() Config {
+	address := os.Getenv("ASTRA_TUNNEL_ADDR")
+	if address == "" {
+		address = ":7000"
+	}
+
+	baseDomain := os.Getenv("ASTRA_BASE_DOMAIN")
+	scheme := os.Getenv("ASTRA_SCHEME")
+	if scheme == "" {
+		scheme = "https"
+	}
+
 	return Config{
-		Address:    ":7000",
-		BaseDomain: "",
-		Scheme:     "https",
+		Address:    address,
+		BaseDomain: baseDomain,
+		Scheme:     scheme,
 	}
 }

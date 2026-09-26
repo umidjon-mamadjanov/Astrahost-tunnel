@@ -10,9 +10,12 @@ import (
 	"github.com/astrahost/astrahost-tunnel/protocol"
 )
 
-func NewEngine(registry *connection.Registry) *engine.Engine {
+func NewEngine(
+	registry *connection.Registry,
+	handshakeConfig handshake.Config,
+) *engine.Engine {
 	d := dispatcher.New()
-	h := handshake.New(registry)
+	h := handshake.New(registry, handshakeConfig)
 	hb := heartbeat.New()
 	httpResponse := httptunnel.NewResponseHandler()
 

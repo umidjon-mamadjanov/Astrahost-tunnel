@@ -27,6 +27,7 @@ type Session struct {
 
 	ProtocolVersion uint8
 	TunnelID        string
+	Subdomain       string
 	ClientVersion   string
 	Platform        string
 	Architecture    string
@@ -80,6 +81,20 @@ func (s *Session) GetTunnelID() string {
 	defer s.mu.RUnlock()
 
 	return s.TunnelID
+}
+
+func (s *Session) SetSubdomain(subdomain string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	s.Subdomain = subdomain
+}
+
+func (s *Session) GetSubdomain() string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	return s.Subdomain
 }
 
 func (s *Session) SetLocalTarget(host string, port uint16) {

@@ -9,7 +9,10 @@ import (
 
 func TestHandleConnect(t *testing.T) {
 	registry := connection.NewRegistry()
-	handler := New(registry)
+	handler := New(registry, Config{
+		BaseDomain: "astrahost.bond",
+		Scheme:     "https",
+	})
 
 	req := protocol.ConnectRequest{
 		ProtocolVersion: protocol.Version,
@@ -76,6 +79,13 @@ func TestHandleConnect(t *testing.T) {
 		t.Fatalf(
 			"unexpected heartbeat interval: %d",
 			connectOK.HeartbeatInterval,
+		)
+	}
+
+	if connectOK.PublicURL != "https://test.astrahost.bond" {
+		t.Fatalf(
+			"unexpected public URL: %s",
+			connectOK.PublicURL,
 		)
 	}
 
